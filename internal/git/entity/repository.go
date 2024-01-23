@@ -4,22 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 )
 
 type Repository struct {
-	Name        string
-	Description string
-	Private     bool
-	Users       UserRepository
+	Name        string         `json:"name"`
+	Description string         `json:"description,omitempty"`
+	Private     bool           `json:"private"`
+	Users       UserRepository `json:"users"`
 }
 
 type UserRepository map[string]string
 
 const (
-	Owner        = "Owner"
-	Collaborator = "Collaborator"
-	Maintainer   = "Maintainer"
-	Reader       = "Reader"
+	Owner        = "OWNER"
+	Collaborator = "COLLABORATOR"
+	Maintainer   = "MAINTAINER"
+	Reader       = "READER"
 )
 
 func NewRepository(name, description string, private bool, users UserRepository) (*Repository, error) {
@@ -30,7 +31,7 @@ func NewRepository(name, description string, private bool, users UserRepository)
 		Users:       users,
 	}
 
-	err := repository.validate()
+	err := repository.Validate()
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +39,7 @@ func NewRepository(name, description string, private bool, users UserRepository)
 	return repository, nil
 }
 
-func (r *Repository) validate() error {
+func (r *Repository) Validate() error {
 	err := validRepositoryName(r.Name)
 	if err != nil {
 		return err
@@ -59,7 +60,7 @@ func validPermissionCategory(users UserRepository) error {
 	}
 	result := "invalid user category permission:"
 	for user, permission := range users {
-		switch permission {
+		switch strings.ToUpper(permission) {
 		case Owner, Collaborator, Maintainer, Reader:
 			continue
 		default:

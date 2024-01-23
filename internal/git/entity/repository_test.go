@@ -7,7 +7,10 @@ import (
 )
 
 func TestCreateRepository(t *testing.T) {
-	repo, err := entity.NewRepository("Repo_name", "Description Test", true, nil)
+	users := make(entity.UserRepository)
+	users["Gabriel"] = "Owner"
+	users["Dani"] = "collaborator"
+	repo, err := entity.NewRepository("Repo_name", "Description Test", true, users)
 	assert.Nil(t, err)
 	assert.NotNil(t, repo)
 	assert.Equal(t, repo.Name, "Repo_name")
@@ -41,6 +44,6 @@ func TestCreateRepositoryWithInvalidUserPermission(t *testing.T) {
 
 	repo, err := entity.NewRepository("Repo_name", "Description Test", true, users)
 	assert.Nil(t, repo)
-	assert.Error(t, err, "description cannot be more than 350 characters")
+	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "invalid user category permission:\nUser: UserFail1 with permission: Master")
 }
