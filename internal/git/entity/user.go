@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/mail"
+	"regexp"
 	"strings"
 )
 
 type User struct {
-	Username    string             `json:"username"`
+	UserName    string             `json:"username"`
 	Email       string             `json:"email"`
 	Name        string             `json:"name"`
 	Permissions []AccessRepository `json:"permissions"`
@@ -21,7 +22,7 @@ type AccessRepository struct {
 
 func NewUser(userName, email, name string, permission []AccessRepository) (*User, error) {
 	user := &User{
-		Username:    userName,
+		UserName:    userName,
 		Email:       email,
 		Name:        name,
 		Permissions: permission,
@@ -58,12 +59,16 @@ func (r *AccessRepository) validate() error {
 }
 
 func (u *User) Validate() error {
-	if u.Username == "" {
-		return errors.New("username is required")
-	}
-	_, err := mail.ParseAddress(u.Email)
+	err := validUserName(u.UserName)
 	if err != nil {
 		return err
+	}
+	err = validEmail(u.Email)
+	if err != nil {
+		return err
+	}
+	if u.Name == "" {
+		return errors.New("name is required")
 	}
 	for _, access := range u.Permissions {
 		err = access.validate()
@@ -71,5 +76,31 @@ func (u *User) Validate() error {
 			return err
 		}
 	}
+	return nil
+}
+
+func validUserName(userName string) error {
+	if userName == "" {
+		return errors.New("username is required")
+	}
+	if len(userName) > 39 {
+		return errors.New("username is too long (maximum is 39 characters)")
+	}
+	regex := regexp.MustCompile(`^[a-zA-Z0-9]+(?:-[a-zA-Z0-9]+)*$`)
+	if !regex.MatchString(userName) {
+		return errors.New("invalid username, may only contain alphanumeric characters or single hyphens, and cannot begin or end with a hyphen")
+	}
+	return nil
+}
+
+func validEmail(email string) error {
+	if email == "" {
+		return errors.New("email is required")
+	}
+	_, err := mail.ParseAddress(email)
+	if err != nil {
+		return errors.New("invalid e-mail")
+	}
+
 	return nil
 }

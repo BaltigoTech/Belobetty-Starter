@@ -2,9 +2,13 @@ package entity_test
 
 import (
 	"Belobetty-Starter/internal/git/entity"
+	"encoding/json"
 	"github.com/stretchr/testify/assert"
+	"os"
 	"testing"
 )
+
+const initialFilePathRepo = "../../../docs/repositories/"
 
 func TestCreateRepository(t *testing.T) {
 	users := make(entity.UserRepository)
@@ -14,12 +18,47 @@ func TestCreateRepository(t *testing.T) {
 	assert.Nil(t, err)
 	assert.NotNil(t, repo)
 	assert.Equal(t, repo.Name, "Repo_name")
+
+	repoJson := new(entity.Repository)
+	jsonData, _ := os.ReadFile(initialFilePathRepo + "ok.json")
+	err = json.Unmarshal(jsonData, repoJson)
+	assert.Nil(t, err)
+	assert.NotNil(t, repoJson)
+
+	err = repoJson.Validate()
+	assert.Nil(t, err)
+
+	assert.Equal(t, "my_repo", repoJson.Name)
+	assert.Equal(t, "OWNER", repoJson.Users["gabs_git"])
+	assert.Equal(t, 4, len(repoJson.Users))
+
 }
 
 func TestCreateRepositoryWithInvalidName(t *testing.T) {
 	repo, err := entity.NewRepository("test@", "Description test", true, nil)
 	assert.Nil(t, repo)
-	assert.Error(t, err, "the repository n can only contain ASCII letters, digits, and the characters ., -, and _")
+	assert.Error(t, err)
+	assert.Equal(t, "the repository name can only contain ASCII letters, digits, and the characters ., -, and _", err.Error())
+
+	repoJson := new(entity.Repository)
+	jsonData, _ := os.ReadFile(initialFilePathRepo + "invalidName.json")
+	err = json.Unmarshal(jsonData, repoJson)
+	assert.Nil(t, err)
+	assert.NotNil(t, repoJson)
+
+	err = repoJson.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "the repository name can only contain ASCII letters, digits, and the characters ., -, and _", err.Error())
+
+	jsonData, _ = os.ReadFile(initialFilePathRepo + "invalidNameMostThan100.json")
+	err = json.Unmarshal(jsonData, repoJson)
+	assert.Nil(t, err)
+	assert.NotNil(t, repoJson)
+
+	err = repoJson.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "name repository is too long (maximum is 100 characters)", err.Error())
+
 }
 
 func TestCreateRepositoryWithInvalidDescription(t *testing.T) {
@@ -33,6 +72,16 @@ func TestCreateRepositoryWithInvalidDescription(t *testing.T) {
 	assert.Nil(t, repo)
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "description cannot be more than 350 characters")
+
+	repoJson := new(entity.Repository)
+	jsonData, _ := os.ReadFile(initialFilePathRepo + "invalidDescription.json")
+	err = json.Unmarshal(jsonData, repoJson)
+	assert.Nil(t, err)
+	assert.NotNil(t, repoJson)
+
+	err = repoJson.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "description cannot be more than 350 characters", err.Error())
 }
 
 func TestCreateRepositoryWithInvalidUserPermission(t *testing.T) {
@@ -46,4 +95,14 @@ func TestCreateRepositoryWithInvalidUserPermission(t *testing.T) {
 	assert.Nil(t, repo)
 	assert.Error(t, err)
 	assert.Equal(t, err.Error(), "invalid user category permission:\nUser: UserFail1 with permission: Master")
+
+	repoJson := new(entity.Repository)
+	jsonData, _ := os.ReadFile(initialFilePathRepo + "invalidUserPermission.json")
+	err = json.Unmarshal(jsonData, repoJson)
+	assert.Nil(t, err)
+	assert.NotNil(t, repoJson)
+
+	err = repoJson.Validate()
+	assert.NotNil(t, err)
+	assert.Equal(t, "invalid user category permission:\nUser: bob_smith with permission: INVALID", err.Error())
 }

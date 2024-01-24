@@ -77,6 +77,9 @@ func validRepositoryName(n string) error {
 	if n == "" {
 		return errors.New("n repository is required")
 	}
+	if len(n) > 100 {
+		return errors.New("name repository is too long (maximum is 100 characters)")
+	}
 	regexPattern := "^[a-zA-Z0-9._-]+$"
 	ok, err := regexp.MatchString(regexPattern, n)
 	if err != nil || !ok {
