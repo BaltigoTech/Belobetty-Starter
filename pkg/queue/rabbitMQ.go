@@ -39,7 +39,7 @@ func NewRabbitMQ(routingKey, url string) (*RabbitMQProducer, error) {
 	}, nil
 }
 
-func (r *RabbitMQProducer) Send(msg []byte) error {
+func (r *RabbitMQProducer) SendMessage(msg []byte) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
