@@ -1,33 +1,38 @@
 package use_cases
 
 import (
-	"Belobetty-Starter/internal/git/dto"
 	"Belobetty-Starter/pkg/queue"
+	"Belobetty-Starter/pkg/queue/dto"
 	"encoding/json"
-	"github.com/gofiber/fiber/v2/log"
 )
 
-const url = "guest@localhost:5672"
+const urlRabbitMQ = "guest@localhost:5672"
 
 type SenderQueue struct {
 	producer queue.Producer
 }
 
 func NewSenderQueue(keyTopic string) (*SenderQueue, error) {
-	p, err := queue.NewRabbitMQ(keyTopic, url)
+	p, err := queue.NewRabbitMQ(keyTopic, urlRabbitMQ)
 	if err != nil {
 		return nil, err
 	}
 	return &SenderQueue{producer: p}, nil
 }
 
-func (s *SenderQueue) Exec(msg *dto.MessageOut) error {
-	log.Infof("Test %s", msg)
-	message, err := json.Marshal(msg)
+func (s *SenderQueue) Exec(body entityGeneric, user, action string) error {
+
+	err := body.Validate()
 	if err != nil {
 		return err
 	}
-	log.Info(message)
+
+	messageDto := dto.NewMessageOut(body, user, action)
+
+	message, err := json.Marshal(messageDto)
+	if err != nil {
+		return err
+	}
 
 	err = s.producer.SendMessage(message)
 	if err != nil {

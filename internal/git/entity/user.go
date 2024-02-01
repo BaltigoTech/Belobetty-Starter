@@ -22,7 +22,7 @@ type AccessRepository struct {
 
 func NewUser(userName, email, name string, permission []AccessRepository) (*User, error) {
 	user := &User{
-		UserName:    userName,
+		UserName:    strings.ToLower(userName),
 		Email:       email,
 		Name:        name,
 		Permissions: permission,
@@ -38,8 +38,8 @@ func NewUser(userName, email, name string, permission []AccessRepository) (*User
 
 func NewAccessRepository(repositoryName, permission string) (*AccessRepository, error) {
 	access := &AccessRepository{
-		Repository: repositoryName,
-		Permission: permission,
+		Repository: strings.ToLower(repositoryName),
+		Permission: strings.ToLower(permission),
 	}
 	err := access.validate()
 	if err != nil {

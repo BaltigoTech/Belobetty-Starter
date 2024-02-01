@@ -1,5 +1,5 @@
 package queue
 
 type Producer interface {
-	SendMessage(obj []byte) error
+	SendMessage(msg []byte) error
 }

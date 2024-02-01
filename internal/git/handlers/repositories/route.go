@@ -9,7 +9,7 @@ func SetRoutes(r fiber.Router) {
 	repo.Post("/", createRepository)
 	repo.Get("/", getAllRepository)
 	repo.Get("/:id", getByRepository)
-	repo.Put("/:id", updateRepository)
+	repo.Put("/", updateRepository)
 	repo.Delete("/:id", deleteRepository)
 
 }

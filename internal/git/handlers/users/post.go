@@ -1,9 +1,9 @@
 package users
 
 import (
-	"Belobetty-Starter/internal/git/dto"
 	"Belobetty-Starter/internal/git/entity"
-	"Belobetty-Starter/internal/git/use_cases"
+	"Belobetty-Starter/internal/use_cases"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"net/http"
 )
@@ -18,21 +18,14 @@ func createUser(c *fiber.Ctx) error {
 		return c.Status(http.StatusBadRequest).JSON("invalid json")
 	}
 
-	err = user.Validate()
-	if err != nil {
-		return c.Status(http.StatusBadRequest).JSON(err.Error())
-	}
-
 	uc, err := use_cases.NewSenderQueue("git")
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(err.Error())
 	}
 
-	userDto := dto.NewMessageOut(user, c.Get("token", "defaultValue"), actionPost)
-
-	err = uc.Exec(userDto)
+	err = uc.Exec(user, c.Get("token", "defaultValue"), actionPost)
 	if err != nil {
 		return c.Status(http.StatusInternalServerError).JSON(err.Error())
 	}
-	return c.Status(http.StatusOK).JSON("createUser")
+	return c.Status(http.StatusCreated).JSON(fmt.Sprintf("Solicitado criação do usuario %s.", user.UserName))
 }

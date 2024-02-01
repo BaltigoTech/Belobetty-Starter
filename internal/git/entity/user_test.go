@@ -14,7 +14,7 @@ func TestCreateUser(t *testing.T) {
 	user, err := entity.NewUser("gabGit", "gabriel@belobetty.com", "Gabriel Ferrara", nil)
 	assert.NotNil(t, user)
 	assert.Nil(t, err)
-	assert.Equal(t, "gabGit", user.UserName)
+	assert.Equal(t, "gabgit", user.UserName)
 	assert.Equal(t, user.Email, "gabriel@belobetty.com")
 
 	var userJson = new(entity.User)
